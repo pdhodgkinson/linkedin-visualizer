@@ -3,14 +3,21 @@
  * Module dependencies.
  */
 
+  //id = 63DO4DUYsc
+
 var express = require('express')
   , routes = require('./routes')
   , user = require('./routes/user')
+    , api = require('./routes/api')
+  , company= require('./routes/company')
   , http = require('http')
   , path = require('path')
     , auth = require('connect-auth'),
-    OAuth = require("oauth").OAuth;
+    OAuth = require("oauth").OAuth,
+    liOauth = require("./linkedin_oauth"),
+  db = require("./db");
 
+var myOauth = new liOauth('test', 'this', 'out');
 var example_keys= require('./linkedin_config');
 for(var key in example_keys) {
     global[key]= example_keys[key];
@@ -19,7 +26,7 @@ for(var key in example_keys) {
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3003);
 linkedinCallback= "http://localhost:" + app.get('port') + "/auth/linkedin_callback";
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
@@ -32,6 +39,44 @@ app.use(express.session());
 app.use(auth({strategies: auth.Linkedin({consumerKey: linkedinConsumerKey, consumerSecret: linkedinConsumerSecret, callback: linkedinCallback}),
     trace: true,
     logoutHandler: require('connect-auth/lib/events').redirectOnLogout("/")}));
+app.use(function(req, res, next) {
+    if(req.isAuthenticated()) {
+        linkedinToken = req.getAuthDetails().linkedin_oauth_token;
+        linkedinSecret = req.getAuthDetails().linkedin_oauth_token_secret;
+    }
+
+
+    if (linkedinToken !== undefined && linkedinSecret !== undefined) {
+        console.log("yep authenticated");
+        console.log("linkedin_token: " + linkedinToken);
+        console.log("linkedin_secret: " + linkedinSecret);
+        req.linkedInOAuth = new liOauth(linkedinConsumerKey,
+            linkedinConsumerSecret,
+            linkedinToken,
+            linkedinSecret
+        );
+
+      if (typeof linkedinId !== 'undefined') {
+        //set linked in ID if stored in config
+        req.session.linkedInId = linkedinId;
+      }
+
+        if (typeof req.session.linkedInId === 'undefined') {
+          console.log("Get user linkedinID");
+          req.linkedInOAuth.api.id(function(data) {
+            data = JSON.parse(data);
+            req.session.linkedInId = data.id;
+            console.log("Set linkedinID to: " + data.id);
+            next();
+          });
+        } else {
+          next();
+        }
+    } else {
+      console.log("not authenticated yet")
+      next();
+    }
+});
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -51,31 +96,18 @@ var oa = new OAuth(
 );
 
 app.get('/', routes.index);
-app.get('/users', user.list);
+app.get('/api/people', api.people);
+//app.get('/users', user.list);
+app.get('/user', user.index);
+app.get('/user/details', user.detail);
+app.get('/company/:id', company.details);
 app.get('/login', function(req, res) {
     if( req.isAuthenticated()) {
-        console.log(req.getAuthDetails());
-        oa.get("http://api.linkedin.com/v1/people/~:(first-name,last-name,picture-url,summary,specialties,positions,skills)",
-            req.getAuthDetails().linkedin_oauth_token,
-            req.getAuthDetails().linkedin_oauth_token_secret,
-            function(error, data) {
-                oa.get("http://api.linkedin.com/v1/companies/20526:(id,name,ticker,description,website-url,industries,logo-url,square-logo-url)",
-                    req.getAuthDetails().linkedin_oauth_token,
-                    req.getAuthDetails().linkedin_oauth_token_secret,
-                    function(error, data) {
-                        console.log(error);
-                        console.log(data);
-                        res.send(data);
-                    });
-
-                console.log(error);
-                console.log(data);
-                res.contentType('application/xml');
-                res.send(data);
-            })
+        res.redirect('/');
+        res.end();
 
     } else {
-    req.authenticate('linkedin', function(error, authenticated) {
+        req.authenticate('linkedin', function(error, authenticated) {
         if( error ) {
             // Something has gone awry, behave as you wish.
             console.log( error );

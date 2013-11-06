@@ -1,0 +1,20 @@
+extends layout
+
+block content
+    each api in apis
+        .api(data-api= api.endpoint)
+            h2= api.title
+            .row
+                .col-md-1
+                    input(class='selectAll', data-checkbox-group-id= api.endpoint + '-checkboxes', type='checkbox',
+                    value='all', checked)
+                    | Select All
+                .col-md-7
+                    ul.list-inline(class='checkbox-group', id= api.endpoint + '-checkboxes')
+                        each param in api.params
+                            li
+                                input(type='checkbox', value= param, checked)
+                                = param
+                .col-md-4
+                    button(class='btn btn-default', type='button') Fetch Details
+
