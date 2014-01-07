@@ -12,14 +12,16 @@ var express = require('express'),
     http = require('http'),
     path = require('path'),
     auth = require('connect-auth'),
-    OAuth = require('oauth').OAuth,
+//OAuth = require('oauth').OAuth,
     liOauth = require('./linkedin_oauth');
 
 //var myOauth = new liOauth('test', 'this', 'out');
 //Todo: This is bad way to load a global config
 var exampleKeys = require('./linkedin_config');
 for (var key in exampleKeys) {
-    global[key] = exampleKeys[key];
+    if (exampleKeys.hasOwnProperty(key)) {
+        global[key] = exampleKeys[key];
+    }
 }
 
 var app = express();
