@@ -101,6 +101,7 @@ if ('development' === app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/api/people', api.people);
+app.get('/api/full', api.full);
 //app.get('/users', user.list);
 app.get('/user', user.index);
 app.get('/user/details', user.detail);
