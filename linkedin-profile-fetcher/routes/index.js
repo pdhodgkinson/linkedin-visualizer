@@ -28,6 +28,33 @@ exports.index = function (req, res) {
                     ]
                 },
                 {
+                    endpoint: 'companies',
+                    title: 'Companies API',
+                    params: [
+                        'id',
+                        'name',
+                        'universal-name',
+                        'email-domains',
+                        'company-type',
+                        'ticker',
+                        'website-url',
+                        'industries',
+                        'status',
+                        'logo-url',
+                        'square-logo-url',
+                        'blog-rss-url',
+                        'twitter-id',
+                        'employee-count-range',
+                        'specialties',
+                        'locations',
+                        'description',
+                        'stock-exchange',
+                        'founded-year',
+                        'end-year',
+                        'num-followers'
+                    ]
+                },
+                {
                     endpoint: 'full',
                     title: 'Fetch All User Info API',
                     params: []

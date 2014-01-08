@@ -2,6 +2,7 @@
  * Created by peter on 26/09/13.
  */
 var db = require('../db'),
+    async = require('async'),
     linkedinAPI = require('../linkedin_oauth/api');
 
 exports.people = function (req, res) {
@@ -19,26 +20,34 @@ exports.people = function (req, res) {
 exports.full = function (req, res) {
     'use strict';
     req.linkedInOAuth.api.people(linkedinAPI.apis.people.fields.join(), function (data) {
-        var peopleData = data;
+        var peopleData = typeof data !== 'undefined' ? JSON.parse(data) : {},
+            parsePosition = function (position, callback) {
+                if (typeof position.company !== 'undefined' &&
+                    typeof position.company.id !== 'undefined') {
+                    req.linkedInOAuth.api.company(position.company.id, linkedinAPI.apis.companies.fields.join(),
+                        function (data) {
+                            var companyData = JSON.parse(data);
+                            position.company = companyData;
+                            callback(null, position);
+                        });
+                } else {
+                    callback(null, position);
+                }
+            };
+
         if (typeof peopleData !== 'undefined' &&
             typeof peopleData.positions !== 'undefined' &&
             peopleData.positions.values !== 'undefined' &&
             peopleData.positions.values.length > 0) {
 
             //parse positions
-            for (var i = 0; i < peopleData.positions.values.length; i++) {
-                var position = peopleData.positions.values[i];
-                if (typeof position.company !== 'undefined' &&
-                    typeof position.company.id !== 'undefined') {
-                    //fetch supplimentary company data
-                    req.linkedInOAuth.api.company(position.company.id, linkedinAPI.apis.company.fields.join(),
-                        function (data) {
-
-                        });
-                }
-            }
+            async.map(peopleData.positions.values, parsePosition, function (err, results) {
+                peopleData.positions.values = results;
+                res.send(peopleData);
+            });
+        } else {
+            res.send(peopleData);
         }
 
-        res.send(data);
     });
 };
