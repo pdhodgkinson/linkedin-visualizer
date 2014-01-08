@@ -14,6 +14,7 @@ exports.apis = {
             'positions',
             'recommendations-received',
             'skills',
+            'projects',
             'site-standard-profile-request',
             'api-standard-profile-request:(url)',
             'public-profile-url'

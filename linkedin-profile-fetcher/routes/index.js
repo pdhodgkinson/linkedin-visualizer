@@ -21,6 +21,7 @@ exports.index = function (req, res) {
                         'specialties',
                         'positions',
                         'recommendations-received',
+                        'projects',
                         'skills',
                         'site-standard-profile-request',
                         'api-standard-profile-request:(url)',
