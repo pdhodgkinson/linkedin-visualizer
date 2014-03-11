@@ -4,3 +4,17 @@
     width: 80px;
     height: 80px;
 }
+
+/*
+D3 Styles
+*/
+.chart {
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+}
+
+.axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}

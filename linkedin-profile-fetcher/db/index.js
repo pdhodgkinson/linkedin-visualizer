@@ -2,6 +2,7 @@
 var mongojs = require('mongojs'),
   DB_NAME = 'linkedin',
   COLLECTIONS = {
+    FULL: 'full',
     PEOPLE: 'people',
     COMPANIES: 'companies'
   },
@@ -14,6 +15,15 @@ module.exports = {
     data['_id'] = data['id'];
     db[COLLECTIONS.PEOPLE].save(data);
   },
+
+  saveFull: function (data) {
+      data['_id'] = data['id'];
+      db[COLLECTIONS.FULL].save(data);
+  },
+
+    fetchFull: function(id, callback) {
+        return db[COLLECTIONS.FULL].findOne({'id': id}, callback);
+    },
 
   getPeople: function (id, callback) {
     return db[COLLECTIONS.PEOPLE].findOne({'id': id}, callback);

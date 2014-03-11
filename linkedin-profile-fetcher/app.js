@@ -9,6 +9,7 @@ var express = require('express'),
     user = require('./routes/user'),
     api = require('./routes/api'),
     company = require('./routes/company'),
+    visualize = require('./routes/visualize'),
     http = require('http'),
     path = require('path'),
     auth = require('connect-auth'),
@@ -106,6 +107,7 @@ app.get('/api/full', api.full);
 app.get('/user', user.index);
 app.get('/user/details', user.detail);
 app.get('/company/:id', company.details);
+app.get('/visualize', visualize.index )
 app.get('/login', function (req, res) {
     'use strict';
     if (req.isAuthenticated()) {
